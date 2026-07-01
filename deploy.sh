@@ -36,6 +36,6 @@ fi
 forever stop "$SERVER_ENTRY" >/dev/null 2>&1 || true
 
 # Start the server
-forever start "$SERVER_ENTRY"
+forever start -o out.log -e err.log -l forever.log -a "$SERVER_ENTRY"
 
 echo "Backend server started successfully."
