@@ -2,6 +2,7 @@ const cheerio = require('cheerio'); // npm install cheerio@1.0.0-rc.12
 const fs = require("fs");
 const { addDate } = require('./playerHandler');
 const data = require("./data.js");
+const { text } = require('body-parser');
 
 
 console.log("Starting...");
@@ -67,7 +68,9 @@ async function getWebsideDOM(dbvUrl, cookie) {
     // console.log(await matchRes.text());
     // return;
 
-    dom = cheerio.load(await matchRes.text());
+    website = await matchRes.text();
+
+    dom = cheerio.load(website);
     return dom;
 }
 
@@ -126,9 +129,8 @@ async function retrieveGames(matchUrl, cookie, teamIndx) {
       let comment = [ matchDom(commentLineTDs[2]).text(), matchDom(commentLineTDs[1]).text(), stringToDate(matchDom(commentLineTDs[3]).text())]
       comments.push(comment);
     }
-    // console.log(comments);
 
-    let time_text = dom(cells[1]).text();
+    let time_text = matchDom("#content table").first().find("tbody > tr").first().find("td").first().text();
     let original_time = time_text;
     if (time_text.split("Verbandsansetzung").length > 1) {
       original_time = time_text.split("Verbandsansetzung")[1];
