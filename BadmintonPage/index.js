@@ -106,7 +106,7 @@ teamRouter.get("/api/teaminfo", (req, res) => {
 })
 
 
-teamRouter.get("/api/calender.ics", (req, res) => {
+teamRouter.get("/api/calendar.ics", (req, res) => {
   res.setHeader("Content-Type", "text/calendar; charset=utf-8");
   res.setHeader("Content-Disposition", 'inline; filename="events.ics"');
   res.send(generateCalender(req.teamIndx));
@@ -167,6 +167,15 @@ teamRouter.use(express.static(
     path.join(__dirname, '../FrontEnd/BadmintonFrontend/dist')
 ));
 
+app.get("/", (req, res) => { //Default page
+    const links = data.teams.map(team => `<li><a href="/${team.teamUrl}">${team.teamName}</a></li>`)
+        .join("");
+
+    res.send(`
+        <h1>TG Bochum Teams:</h1>
+        <ul>${links}</ul>
+    `);
+});
 
 app.use("/:team", teamMiddleware, teamRouter);
 

@@ -7,7 +7,7 @@ import SubscribeCalenderButton from './components/SubscribeCalenderButton.vue';
   <main class="w-full flex justify-center">
     <div class="w-full max-w-3xl ">
       <MatchTable />
-    </div><br>
-    <SubscribeCalenderButton />
+      <SubscribeCalenderButton class="mt-4"/>
+    </div>
   </main>
 </template>

@@ -22,6 +22,8 @@ fetch(url,
         teamname.value = json.teamname;
         mini.value = json.mini;
         teamUrl.value = json.teamUrl;
+
+        document.title = "TG Bochum " + teamUrl.value.toUpperCase();
     });
     
 });
