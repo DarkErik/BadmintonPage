@@ -1,6 +1,7 @@
 const cheerio = require('cheerio'); // npm install cheerio@1.0.0-rc.12
 const fs = require("fs");
 const { addDate } = require('./playerHandler');
+const data = require("./data.js");
 
 
 console.log("Starting...");
@@ -70,7 +71,7 @@ async function getWebsideDOM(dbvUrl, cookie) {
     return dom;
 }
 
-async function retrieveGames(matchUrl, cookie) {
+async function retrieveGames(matchUrl, cookie, teamIndx) {
   let dom = await getWebsideDOM(matchUrl, cookie);
   let games = [];
 
@@ -127,9 +128,16 @@ async function retrieveGames(matchUrl, cookie) {
     }
     // console.log(comments);
 
+    let time_text = dom(cells[1]).text();
+    let original_time = time_text;
+    if (time_text.split("Verbandsansetzung").length > 1) {
+      original_time = time_text.split("Verbandsansetzung")[1];
+      time_text = time_text.split("Verbandsansetzung")[0];
+    }
 
     let game = {
-      time: stringToDate(dom(cells[1]).text()) ?? "",
+      time:  stringToDate(time_text) ?? stringToDate("1.1.1970"), // 
+      original_time: stringToDate(original_time), 
       host: dom(cells[6]).text(),
       guest: dom(cells[8]).text(),
       matchLink: matchLink,
@@ -142,19 +150,19 @@ async function retrieveGames(matchUrl, cookie) {
     games.push(game);
   }
 
+  data.games[teamIndx] = games;
+
   let indx = 0;
   for(const g of games) {
     for(const c of g.comments.reverse()) {
       let dateFound = stringToDate(c[1]);
-      console.log("Comment: " + c[1] + "\nfound: " + dateFound);
+      // console.log("Comment: " + c[1] + "\nfound: " + dateFound);
       if (dateFound !== null) {
-        addDate(dateFound, false, c[2], indx, games.length);
+        addDate(dateFound, false, c[2], indx, teamIndx);
       }
     }
     indx++;
   }
-
-  return games;
 }
 
 function stringToDate(input) {
@@ -194,14 +202,14 @@ function stringToDate(input) {
     //TODO ADD LATEST TIME TO DATE IF AVAILABLE
     const date = new Date(latestDate[2], latestDate[1] - 1, latestDate[0], latestTime[0], latestTime[1]);
 
-    const formatted = date.toLocaleDateString("de-DE", {
-      weekday: "long",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    });
+    // const formatted = date.toLocaleDateString("de-DE", {
+    //   weekday: "long",
+    //   day: "2-digit",
+    //   month: "2-digit",
+    //   year: "numeric"
+    // });
 
-    console.log(formatted)
+    // console.log(formatted)
 
     return date;
 
@@ -211,9 +219,9 @@ function stringToDate(input) {
 }
 
 
-async function getGameInfo(matchUrl) {
+async function getGameInfo(matchUrl, teamIndx) {
   let sessionCookie = await getSessionCookie();
-  let games = await retrieveGames(matchUrl, sessionCookie);
+  let games = await retrieveGames(matchUrl, sessionCookie, teamIndx);
   console.log("Finished game retrieval.");
   return games;
 }

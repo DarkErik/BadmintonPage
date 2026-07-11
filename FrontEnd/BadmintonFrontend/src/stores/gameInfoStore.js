@@ -2,7 +2,8 @@ import {defineStore} from "pinia"
 
 import { usePlayerStore } from "./gamePlayerStore";
 
-const BACKEND_URL = "https://tg.dondevelops.de"; // "http://localhost:3122"
+//const BACKEND_URL = "https://tg.dondevelops.de"; // "http://localhost:3122"
+const BACKEND_URL = "http://localhost:3122";
 
 export const useGameInfoStore = defineStore("gameInfoStore", {
     state: () => {
@@ -47,7 +48,7 @@ export const useGameInfoStore = defineStore("gameInfoStore", {
     },
     actions: {
         async update() {
-            const url = BACKEND_URL + "/api/gameinfo";
+            const url = "./api/gameinfo";
             try {
                 const response = await fetch(url);
                 if (!response.ok) {

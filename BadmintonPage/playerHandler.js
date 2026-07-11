@@ -1,28 +1,46 @@
 const fs = require("fs");
+const path = require("path");
 
-const playerPath = "./data/players.json";
-const datePath = "./data/dates.json";
+const data = require("./data.js");
+
+const dataPath = "./data"
+const playerPath = "players.json";
+const datePath = "dates.json";
 
 
-let currentPlayer = null;
-let currentDates = null;
 
-function writePlayersToFile() {
-    if (currentPlayer === null)
-        return;
+let currentPlayer = [];
+let currentDates = [];
 
-    fs.writeFileSync(playerPath, JSON.stringify(currentPlayer));
+function initPlayerHandler() {
+    for(let t of data.teams) {
+        currentPlayer.push(null);
+        currentDates.push(null);
+        
+        let teamDir = path.join(dataPath, t.teamUrl);
+        if (!fs.existsSync(teamDir))
+            fs.mkdirSync(teamDir);
+    }
+    
 }
 
-function addPlayer(name, man, maybe, game, amountOfGames) {
-    
-    if (game > amountOfGames)
+function writePlayersToFile(teamIndx) {
+    if (currentPlayer[teamIndx] === null)
+        return;
+
+    fs.writeFileSync(path.join(dataPath, data.teams[teamIndx].teamUrl, playerPath), JSON.stringify(currentPlayer[teamIndx]));
+}
+
+function addPlayer(name, man, maybe, game, teamIndx) {
+    if (teamIndx > data.teams.length)
+        return;
+    if (game > data.games[teamIndx].length)
         return;
     if (name == "")
         return;
     
     
-    let g = getPlayers(amountOfGames)[game];
+    let g = getPlayers(teamIndx)[game];
 
     if (man) {
         if (maybe) {
@@ -46,8 +64,6 @@ function addPlayer(name, man, maybe, game, amountOfGames) {
             if (g.registeredMaybeWoman.indexOf(name) === -1)
                 g.registeredMaybeWoman.push(name);
         } else {
-            console.log(name);
-            console.log(g.registeredMaybeWoman);
             let indx = g.registeredMaybeWoman.indexOf(name); 
             if (indx !== -1)
                 g.registeredMaybeWoman.splice(indx, 1);
@@ -56,17 +72,19 @@ function addPlayer(name, man, maybe, game, amountOfGames) {
         }
     }
 
-    writePlayersToFile();
-    return currentPlayer;
+    writePlayersToFile(teamIndx);
+    return getPlayers(teamIndx);
 }
 
-function removePlayer(name, man, gameIndx, amountOfGames) {
-    if (gameIndx > amountOfGames)
+function removePlayer(name, man, gameIndx, teamIndx) {
+    if (teamIndx > data.teams.length)
+        return;
+    if (gameIndx > data.games[teamIndx].length)
         return;
     if (name == "")
         return;
     
-    let game = getPlayers(amountOfGames)[gameIndx];
+    let game = getPlayers(teamIndx)[gameIndx];
     name = name.replace("(", "");
     name = name.replace(")", "");
 
@@ -88,70 +106,80 @@ function removePlayer(name, man, gameIndx, amountOfGames) {
         }
     }
 
-    writePlayersToFile();
-    return currentPlayer;
+    writePlayersToFile(teamIndx);
+    return getPlayers(teamIndx);
 }
 
-function getPlayers(amountOfGames) {
-    if (currentPlayer === null) {
-        if (!fs.existsSync(playerPath)) {
-            currentPlayer = [];
+function getPlayers(teamIndx) {
+    if (teamIndx > data.teams.length)
+        return null;
+
+    if (currentPlayer[teamIndx] === null) {
+        let filePath = path.join(dataPath, data.teams[teamIndx].teamUrl, playerPath);
+        if (!fs.existsSync(filePath)) {
+            currentPlayer[teamIndx] = [];
         } else {
-            currentPlayer = JSON.parse(fs.readFileSync(playerPath, { encoding: 'utf8', flag: 'r' }));
+            currentPlayer[teamIndx] = JSON.parse(fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' }));
         }
     }
 
-    while(currentPlayer.length < amountOfGames) {
-        currentPlayer.push({
+    while(currentPlayer[teamIndx].length < data.games[teamIndx].length) {
+        currentPlayer[teamIndx].push({
             registeredMans: [],
             registeredMaybeMans: [],
             registeredWoman: [],
             registeredMaybeWoman: [],
         });
     }
-    while(currentPlayer.length > amountOfGames) {
-        currentPlayer.pop();
+    while(currentPlayer[teamIndx].length > data.games[teamIndx].length) {
+        currentPlayer[teamIndx].pop();
     }
-    return currentPlayer;
+    return currentPlayer[teamIndx];
 }
 
-function getDates(amountOfGames) {
-    if (currentDates === null) {
-        if (!fs.existsSync(datePath)) {
-            currentDates = [];
+function getDates(teamIndx) {
+    if (teamIndx > data.teams.length)
+        return null;
+
+    if (currentDates[teamIndx] === null) {
+        let filePath = path.join(dataPath, data.teams[teamIndx].teamUrl, datePath);
+        if (!fs.existsSync(filePath)) {
+            currentDates[teamIndx] = [];
         } else {
-            currentDates = JSON.parse(fs.readFileSync(datePath, { encoding: 'utf8', flag: 'r' }));
+            currentDates[teamIndx] = JSON.parse(fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' }));
         }
     }
 
-    while(currentDates.length < amountOfGames) {
-        currentDates.push({
+    while(currentDates[teamIndx].length < data.games[teamIndx].length) {
+        currentDates[teamIndx].push({
             dates: [],
             registeredTime: [],
             approved: false
         });
     }
 
-    while(currentDates.length > amountOfGames) {
-        currentDates.pop();
+    while(currentDates[teamIndx].length > data.games[teamIndx].length) {
+        currentDates[teamIndx].pop();
     }
-    return currentDates;
+    return currentDates[teamIndx];
 }
 
-function writeDatesToFile() {
-    if (currentDates === null)
+function writeDatesToFile(teamIndx) {
+    if (currentDates[teamIndx] === null)
         return;
 
-    fs.writeFileSync(datePath, JSON.stringify(currentDates));
+    fs.writeFileSync(path.join(dataPath, data.teams[teamIndx].teamUrl, datePath), JSON.stringify(currentDates[teamIndx]));
 }
 
 
-function addDate(date, approved, registeredTime, gameIndx, amountOfGames) {
-    if (gameIndx >= amountOfGames)
+function addDate(date, approved, registeredTime, gameIndx, teamIndx) {
+    if (teamIndx > data.teams.length)
+        return null;
+    if (gameIndx >= data.games[teamIndx].length)
         return;
     if (date == null)
         return;
-    let dates = getDates(amountOfGames);
+    let dates = getDates(teamIndx);
     if (registeredTime !== null && dates[gameIndx].registeredTime.length > 0) {
         // console.log("Step 2.5 L: " + dates[gameIndx].registeredTime.length > 0);
         if (registeredTime.getTime() < new Date(dates[gameIndx].registeredTime[dates[gameIndx].registeredTime.length - 1]).getTime()) { // exit if old 
@@ -185,33 +213,41 @@ function addDate(date, approved, registeredTime, gameIndx, amountOfGames) {
     dates[gameIndx].registeredTime.push(registeredTime ?? new Date(Date.now()));
     dates[gameIndx].approved = approved;
     console.log("Date accepted");
-    writeDatesToFile();
+    writeDatesToFile(teamIndx);
 }
 
-function getChangedDate(gameIndx, amountOfGames) {
-    if(gameIndx < 0 || gameIndx >= amountOfGames) {
+function getChangedDate(gameIndx, teamIndx) {
+    if (teamIndx > data.teams.length)
+        return null;
+
+    if(gameIndx < 0 || data.games[teamIndx].length) {
         return null;
     }
-    if (currentDates[gameIndx].dates.length > 0)
-        return [currentDates[gameIndx].dates[currentDates[gameIndx].dates.length - 1], currentDates[gameIndx].approved];
+    let dates = getDates(teamIndx);
+    if (dates.dates.length > 0)
+        return [dates[i].dates[dates[i].dates.length - 1], dates[i].approved];
     else 
         return null;
 }
 
-function approveDate(gameIndx, amountOfGames) {
-    if (gameIndx < 0 || gameIndx >= amountOfGames)
+function approveDate(gameIndx, teamIndx) {
+    if (teamIndx > data.teams.length)
+        return null;
+
+    if(gameIndx < 0 || gameIndx > data.games[teamIndx].length) 
         return;
-    let dates = getDates(amountOfGames);
+    let dates = getDates(teamIndx);
     dates[gameIndx].approved = true;
-    console.log("Approved Date: gameIndx: " + gameIndx);
-    writeDatesToFile();
+    console.log("Approved Date: gameIndx: " + gameIndx + " team: " + teamIndx);
+    writeDatesToFile(teamIndx);
 }
 
-function getAllChangedDate() {
+function getAllChangedDate(teamIndx) {
+    let cDates = getDates(teamIndx);
     let games = [];
-    for(let i = 0; i < currentDates.length; i++) {
-        if (currentDates[i].dates.length > 0) {
-            games.push([currentDates[i].dates[currentDates[i].dates.length - 1], currentDates[i].approved]);
+    for(let i = 0; i < cDates.length; i++) {
+        if (cDates[i].dates.length > 0) {
+            games.push([cDates[i].dates[cDates[i].dates.length - 1], cDates[i].approved]);
         } else 
             games.push(null);
     }
@@ -224,3 +260,4 @@ exports.addDate = addDate;
 exports.getPlayers = getPlayers;
 exports.addPlayer = addPlayer;
 exports.removePlayer = removePlayer;
+exports.initPlayerHandler = initPlayerHandler;

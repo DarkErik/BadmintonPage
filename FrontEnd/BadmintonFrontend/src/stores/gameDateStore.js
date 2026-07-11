@@ -1,6 +1,7 @@
 import {defineStore} from "pinia"
 
-const BACKEND_URL = "https://tg.dondevelops.de"; // "http://localhost:3122"
+// const BACKEND_URL = "https://tg.dondevelops.de"; // "http://localhost:3122"
+const BACKEND_URL = "http://localhost:3122/A";
 
 export const useDateStore = defineStore("dates", {
     state: () => {
@@ -14,13 +15,12 @@ export const useDateStore = defineStore("dates", {
     },
     actions: {
          async update() {
-            const url = BACKEND_URL + "/api/currentDates";
+            const url = "./api/currentDates";
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`[FATAL] Could not fetch players.`);
                 }
-
                 const gameJson = await response.json();
                 //console.log(JSON.stringify(gameJson));
                 console.log("Updated date info:" );
@@ -35,7 +35,7 @@ export const useDateStore = defineStore("dates", {
 
         async changeDate(date, gameIndx) {
            
-            const url = BACKEND_URL + "/api/changeDate";
+            const url = "./api/changeDate";
             try {
                 const response = await fetch(url,
                     {
@@ -61,7 +61,7 @@ export const useDateStore = defineStore("dates", {
             }
         },
         async approve(gameIndx) {
-            const url = BACKEND_URL + "/api/approveDate";
+            const url = "./api/approveDate";
             try {
                 const response = await fetch(url,
                     {

@@ -1,0 +1,38 @@
+[
+    {
+        "teamUrl": "1",
+        "teamName": "Erwachsene 1",
+        "matchUrl": "https://dbv.turnier.de/sport/teammatches.aspx?id=D6F7A756-39F3-4CB4-8F27-0E30E0421F4A&tid=361",
+        "mini": false
+    },
+    {
+        "teamUrl": "2",
+        "teamName": "Erwachsene 2",
+        "matchUrl": "https://dbv.turnier.de/sport/teammatches.aspx?id=D6F7A756-39F3-4CB4-8F27-0E30E0421F4A&tid=401",
+        "mini": false
+    },
+    {
+        "teamUrl": "j1",
+        "teamName": "Jugend 1",
+        "matchUrl": "https://dbv.turnier.de/sport/teammatches.aspx?id=D6F7A756-39F3-4CB4-8F27-0E30E0421F4A&tid=1119",
+        "mini": false
+    },
+    {
+        "teamUrl": "m1",
+        "teamName": "Mini 1",
+        "matchUrl": "https://dbv.turnier.de/sport/teammatches.aspx?id=D6F7A756-39F3-4CB4-8F27-0E30E0421F4A&tid=1155",
+        "mini": true
+    },
+    {
+        "teamUrl": "m2",
+        "teamName": "Mini 2",
+        "matchUrl": "https://dbv.turnier.de/sport/teammatches.aspx?id=D6F7A756-39F3-4CB4-8F27-0E30E0421F4A&tid=1118",
+        "mini": true
+    },
+    {
+        "teamUrl": "m3",
+        "teamName": "Mini 3",
+        "matchUrl": "https://dbv.turnier.de/sport/teammatches.aspx?id=D6F7A756-39F3-4CB4-8F27-0E30E0421F4A&tid=1194",
+        "mini": true
+    }
+]

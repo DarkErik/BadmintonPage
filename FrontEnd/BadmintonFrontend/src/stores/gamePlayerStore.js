@@ -1,6 +1,7 @@
 import {defineStore} from "pinia"
 
-const BACKEND_URL = "https://tg.dondevelops.de"; // "http://localhost:3122"
+//const BACKEND_URL = "https://tg.dondevelops.de"; // "http://localhost:3122"
+const BACKEND_URL = "http://localhost:3122";
 
 export const usePlayerStore = defineStore("player", {
     state: () => {
@@ -23,7 +24,7 @@ export const usePlayerStore = defineStore("player", {
     },
     actions: {
          async update() {
-            const url = BACKEND_URL + "/api/players";
+            const url = "./api/players";
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
@@ -76,7 +77,7 @@ export const usePlayerStore = defineStore("player", {
                 }
             }
             
-            const url = BACKEND_URL + "/api/addplayer";
+            const url = "./api/addplayer";
             try {
                 const response = await fetch(url,
                     {
@@ -126,7 +127,7 @@ export const usePlayerStore = defineStore("player", {
                 }
             }
 
-            const url = BACKEND_URL + "/api/removeplayer";
+            const url = "./api/removeplayer";
             try {
                 const response = await fetch(url,
                     {
