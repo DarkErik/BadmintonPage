@@ -123,6 +123,7 @@ function getPlayers(teamIndx) {
         }
     }
 
+
     while(currentPlayer[teamIndx].length < data.games[teamIndx].length) {
         currentPlayer[teamIndx].push({
             registeredMans: [],

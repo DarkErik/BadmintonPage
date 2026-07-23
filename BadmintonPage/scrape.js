@@ -86,7 +86,7 @@ async function retrieveGames(matchUrl, cookie, teamIndx) {
   let dom = await getWebsideDOM(matchUrl, cookie);
 
   if (dom === null)
-    return null;
+    return false;
 
   let games = [];
 
@@ -98,7 +98,7 @@ async function retrieveGames(matchUrl, cookie, teamIndx) {
     let matchDom = await getWebsideDOM(matchLink, cookie);
     
     if (matchDom === null)
-      return null;
+      return false;
 
     let detailScore = [];
 
@@ -180,6 +180,8 @@ async function retrieveGames(matchUrl, cookie, teamIndx) {
     }
     indx++;
   }
+
+  return true;
 }
 
 function stringToDate(input) {
@@ -240,19 +242,20 @@ async function getGameInfo(matchUrl, teamIndx) {
   let sessionCookie = await getSessionCookie();
   if (sessionCookie === null){
     console.log("Failed to fetch games! [cookie failed]");
-    return null;
+    return false;
   }
   
   await sleep(500);
 
-  let games = await retrieveGames(matchUrl, sessionCookie, teamIndx);
-  if (games === null) {
+  let success = await retrieveGames(matchUrl, sessionCookie, teamIndx);
+
+  if (!success) {
     console.log("Failed to fetch games!");
-    return null;
+    return false;
   }
 
-  console.log("Finished game retrieval.");
-  return games;
+  console.log("Finished game retrieval. [" + teamIndx + "]");
+  return true;
 }
 
 exports.stringToDate = stringToDate;
