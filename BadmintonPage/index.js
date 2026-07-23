@@ -14,8 +14,7 @@ const { generateCalender } = require("./calender.js");
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const MINUTE_MS = 1000 * 60;
 
-function readTeams() {
-  data.teams = JSON.parse(fs.readFileSync("config/teams.json", { encoding: 'utf8', flag: 'r' }));
+async function readTeams() {
 
   data.games = [];
   for(let team of data.teams) {
@@ -23,7 +22,10 @@ function readTeams() {
   }
 
   for(let i = 0; i < data.teams.length; i++) {
-    getGameInfo(data.teams[i].matchUrl, i)
+    const g = await getGameInfo(data.teams[i].matchUrl, i);
+    if (g !== null)
+      data.games[i] = g;
+    
   }
 
   function randomDelay(standardTime, deviation) {
@@ -32,7 +34,9 @@ function readTeams() {
   
   async function repeatGameFetching() {
     for(let i2 = 0; i2 < data.teams.length; i2++) {
-      await getGameInfo(data.teams[i2].matchUrl, i2);
+      const g = await getGameInfo(data.teams[i2].matchUrl, i2);
+      if (g !== null)
+        data.games[i2] = g;
       await sleep(randomDelay(20 * MINUTE_MS, 5 * MINUTE_MS))
     }
 
@@ -43,6 +47,7 @@ function readTeams() {
       
 }
 
+data.teams = JSON.parse(fs.readFileSync("config/teams.json", { encoding: 'utf8', flag: 'r' }));
 readTeams();
 initPlayerHandler();
 

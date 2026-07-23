@@ -4,6 +4,7 @@ const { addDate } = require('./playerHandler');
 const data = require("./data.js");
 const { text } = require('body-parser');
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 console.log("Starting...");
 
@@ -40,7 +41,7 @@ async function getSessionCookie() {
 
     return  cookieHeader + "&c=1&cp=23";
   } catch (error) {
-    console.error(error.message);
+    console.error("Failed to fetch Cookie: \n" + error.message);
     return null;
   }
 }
@@ -54,28 +55,39 @@ function waitForEnter(message = "Press Enter to continue...") {
 
 
 async function getWebsideDOM(dbvUrl, cookie) {
-      const matchRes = await fetch(dbvUrl, {
-        method: "GET",
-        headers: {
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-                        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "accept": "*/*",
-        "Host": "dbv.turnier.de",
-        "Cookie": cookie,
-        "Referer": "https://dbv.turnier.de/cookiewall/?returnurl=%2Fsport%2Fteammatches.aspx%3Fid%3D925D6245-1FA1-496D-9810-1439487E5801%26tid%3D1040"
-        }
-    });
-    // console.log(await matchRes.text());
-    // return;
+  for(let tries = 0; tries < 2; tries++) {
+    try {
+        const matchRes = await fetch(dbvUrl, {
+          method: "GET",
+          headers: {
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+                          "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "accept": "*/*",
+          "Host": "dbv.turnier.de",
+          "Cookie": cookie,
+          "Referer": "https://dbv.turnier.de/cookiewall/?returnurl=%2Fsport%2Fteammatches.aspx%3Fid%3D925D6245-1FA1-496D-9810-1439487E5801%26tid%3D1040"
+          }
+      });
+      // console.log(await matchRes.text());
+      // return;
 
-    website = await matchRes.text();
+      website = await matchRes.text();
 
-    dom = cheerio.load(website);
-    return dom;
+      dom = cheerio.load(website);
+      return dom;
+    } catch (error) {
+      console.error("Failed to fetch Webside Dom: [" + tries + "] " + dbvUrl + "\n" + error.message);
+    }
+  }
+  return null;
 }
 
 async function retrieveGames(matchUrl, cookie, teamIndx) {
   let dom = await getWebsideDOM(matchUrl, cookie);
+
+  if (dom === null)
+    return null;
+
   let games = [];
 
   const gameRows = dom("table.ruler.matches > tbody > tr").toArray();
@@ -85,6 +97,9 @@ async function retrieveGames(matchUrl, cookie, teamIndx) {
     const matchLink = "https://dbv.turnier.de/sport/" + dom(cells[6]).find("a").attr("href");
     let matchDom = await getWebsideDOM(matchLink, cookie);
     
+    if (matchDom === null)
+      return null;
+
     let detailScore = [];
 
 
@@ -223,7 +238,19 @@ function stringToDate(input) {
 
 async function getGameInfo(matchUrl, teamIndx) {
   let sessionCookie = await getSessionCookie();
+  if (sessionCookie === null){
+    console.log("Failed to fetch games! [cookie failed]");
+    return null;
+  }
+  
+  await sleep(500);
+
   let games = await retrieveGames(matchUrl, sessionCookie, teamIndx);
+  if (games === null) {
+    console.log("Failed to fetch games!");
+    return null;
+  }
+
   console.log("Finished game retrieval.");
   return games;
 }
